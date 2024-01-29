@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { useSnackbar } from 'notistack'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import authService from '../services/authService'
 const VerifyUserPage = () => {
   const [loading, setLoading] = useState(false)
   const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [formData, setFormData] = useState({
-    email: '',
+    email: location.state?.email || '',
     token: '',
   })
 
@@ -85,6 +86,7 @@ const VerifyUserPage = () => {
                   type="email"
                   name="email"
                   id="email"
+                  value={formData.email}
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="name@company.com"
                   onChange={(e) => {

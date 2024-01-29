@@ -41,7 +41,7 @@ export const RegisterPage = () => {
           },
         })
         setLoading(false)
-        navigate('/verify')
+        navigate('/verify', { state: { email: formData.email } })
       } else {
         enqueueSnackbar(result.error, {
           variant: 'error',

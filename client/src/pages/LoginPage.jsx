@@ -44,7 +44,7 @@ const LoginPage = () => {
           secure: true,
         })
         setLoading(false)
-        window.location.reload()
+        window.location.href = '/'
       }
     } catch (error) {
       console.log(error)
