@@ -32,7 +32,7 @@ async function sendVerificationEmail(
     from: 'taskplus.squad@gmail.com',
     to: userEmail,
     subject: subject,
-    text: `Your verification code: ${text}`,
+    text: text,
   }
 
   transporter.sendMail(mailOptions, (error, info) => {

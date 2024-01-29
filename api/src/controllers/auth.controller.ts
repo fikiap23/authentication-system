@@ -55,7 +55,8 @@ const registerUser = async (req: Request, res: Response) => {
       expires_at: new Date(expireTime),
     })
 
-    await sendVerificationEmail(newUser.email, 'Verify email', token.token)
+    const message: string = `Your verification code is ${tokenValue}`
+    await sendVerificationEmail(newUser.email, 'Verify email', message)
 
     logger.info('Success register user')
     return sendResponseApi({
@@ -302,10 +303,11 @@ const sendResetPasswordEmail = async (req: Request, res: Response) => {
 
     // Send reset password email
     const resetPasswordLink = `http://localhost:4000/reset-password/${user._id}/${resetToken.token}`
+    const message = `Click this link to reset your password: ${resetPasswordLink}`
     const result = await sendVerificationEmail(
       user.email,
       'Reset Password',
-      resetPasswordLink
+      message
     )
     console.log(result)
 
