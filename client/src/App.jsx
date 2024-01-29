@@ -5,6 +5,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import ForgotPassword from './pages/ForgotPassword'
 import { useRecoilValue } from 'recoil'
 import userAtom from './atoms/userAtom'
+import VerifyUserPage from './pages/VerifyUserPage'
 
 function App() {
   const user = useRecoilValue(userAtom)
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify" element={<VerifyUserPage />} />
       </Routes>
     </>
   )
