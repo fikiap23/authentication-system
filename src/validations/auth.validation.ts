@@ -37,9 +37,18 @@ const verifyEmailValidation = (payload: { email: string; token: string }) => {
   return schema.validate(payload)
 }
 
+const sendResetPasswordEmailValidation = (payload: { email: string }) => {
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+  })
+
+  return schema.validate(payload)
+}
+
 export default {
   createUserValidation,
   loginUserValidation,
   refreshTokenValidation,
   verifyEmailValidation,
+  sendResetPasswordEmailValidation,
 }

@@ -1,4 +1,6 @@
 import { Request, Response } from 'express'
+import crypto from 'crypto'
+import { ObjectId } from 'mongodb'
 import authService from '../services/auth.service'
 import { logger } from '../utils/logger'
 import sendResponseApi from '../utils/sendResponseApi'
@@ -127,6 +129,8 @@ const verifyEmail = async (req: Request, res: Response) => {
       })
     }
 
+    await authService.deleteToken(user._id)
+
     logger.info('Success verify email')
     return sendResponseApi({
       res,
@@ -252,4 +256,156 @@ const refreshToken = async (req: Request, res: Response) => {
   }
 }
 
-export default { registerUser, loginUser, refreshToken, verifyEmail }
+const sendResetPasswordEmail = async (req: Request, res: Response) => {
+  const { error, value } = authValidation.sendResetPasswordEmailValidation(
+    req.body
+  )
+  if (error) {
+    logger.error(
+      'ERR: auth - send reset password email = ',
+      error.details[0].message
+    )
+    return sendResponseApi({
+      res,
+      statusCode: 400,
+      message: error.details[0].message,
+    })
+  }
+
+  try {
+    value.email = value.email.toLowerCase()
+    const user = await authService.getUserByEmail(value.email)
+    if (!user) {
+      return sendResponseApi({
+        res,
+        statusCode: 404,
+        message: 'Email not found',
+      })
+    }
+
+    // Generate and save reset token
+    const tokenValue = crypto.randomBytes(32).toString('hex')
+    const resetToken = await authService.saveResetToken({
+      user_id: user._id,
+      token: tokenValue,
+      created_at: new Date(),
+      expires_at: new Date(Date.now() + 1000 * 60 * 30), // Expires in 30 minutes
+    })
+
+    if (!resetToken) {
+      return sendResponseApi({
+        res,
+        statusCode: 500,
+        message: 'Internal server error',
+      })
+    }
+
+    // Send reset password email
+    const resetPasswordLink = `http://localhost:4000/reset-password/${user._id}/${resetToken.token}`
+    const result = await sendVerificationEmail(
+      user.email,
+      'Reset Password',
+      resetPasswordLink
+    )
+    console.log(result)
+
+    logger.info('Success send reset password email')
+    return sendResponseApi({
+      res,
+      statusCode: 200,
+      message: `Success send reset password email to ${user.email}, please check your email`,
+    })
+  } catch (error) {
+    logger.error('ERR: auth - send reset password email = ', error)
+    return sendResponseApi({
+      res,
+      statusCode: 500,
+      message: 'Internal server error',
+    })
+  }
+}
+
+const resetPassword = async (req: Request, res: Response) => {
+  const { userId, token } = req.params
+  let newPassword = req.body.newPassword
+
+  try {
+    if (!userId || !token || !newPassword) {
+      return sendResponseApi({
+        res,
+        statusCode: 400,
+        message: 'Missing required parameters',
+      })
+    }
+    // Validasi token dan ambil informasi reset token
+    const tokenFormDB = await authService.getTokenByUserId(
+      userId as unknown as ObjectId
+    )
+
+    if (!tokenFormDB) {
+      return sendResponseApi({
+        res,
+        statusCode: 404,
+        message: 'Reset token not found',
+      })
+    }
+    if (!tokenFormDB || tokenFormDB.expires_at < new Date()) {
+      return sendResponseApi({
+        res,
+        statusCode: 401,
+        message: ' expired reset token',
+      })
+    }
+
+    // Validasi token
+    // console.log(token.length, tokenFormDB.token.length)
+    if (token.trim() !== tokenFormDB.token.trim()) {
+      return sendResponseApi({
+        res,
+        statusCode: 401,
+        message: 'Invalid reset token',
+      })
+    }
+
+    // Hash password
+    newPassword = await hashPassword(newPassword)
+    // Reset password untuk user dengan userId
+    const updatedUser = await authService.resetPassword(
+      userId as unknown as ObjectId,
+      newPassword
+    )
+
+    if (!updatedUser) {
+      return sendResponseApi({
+        res,
+        statusCode: 500,
+        message: 'Internal server error',
+      })
+    }
+
+    // Optional: Hapus reset token setelah penggunaan
+    await authService.deleteToken(userId as unknown as ObjectId)
+
+    return sendResponseApi({
+      res,
+      statusCode: 200,
+      message: 'Password reset successfully',
+    })
+  } catch (error) {
+    logger.error('ERR: auth - reset password = ', error)
+    return sendResponseApi({
+      res,
+      statusCode: 500,
+      message: 'Internal server error',
+    })
+  }
+}
+
+export default {
+  registerUser,
+  loginUser,
+  refreshToken,
+  verifyEmail,
+  sendResetPasswordEmail,
+  resetPassword,
+}
