@@ -20,4 +20,16 @@ const loginUserValidation = (payload: UserType) => {
   return schema.validate(payload)
 }
 
-export default { createUserValidation, loginUserValidation }
+const refreshTokenValidation = (payload: UserType) => {
+  const schema = Joi.object({
+    refresh_token: Joi.string().required(),
+  })
+
+  return schema.validate(payload)
+}
+
+export default {
+  createUserValidation,
+  loginUserValidation,
+  refreshTokenValidation,
+}

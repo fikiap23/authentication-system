@@ -4,7 +4,7 @@ import { logger } from '../utils/logger'
 import sendResponseApi from '../utils/sendResponseApi'
 import authValidation from '../validations/auth.validation'
 import { comparePassword, hashPassword } from '../utils/hashing'
-import { signJWT } from '../utils/jwt'
+import { signJWT, verifyJWT } from '../utils/jwt'
 
 const registerUser = async (req: Request, res: Response) => {
   const { error, value } = authValidation.createUserValidation(req.body)
@@ -102,4 +102,49 @@ const loginUser = async (req: Request, res: Response) => {
   }
 }
 
-export default { registerUser, loginUser }
+const refreshToken = async (req: Request, res: Response) => {
+  const { error, value } = authValidation.refreshTokenValidation(req.body)
+  if (error) {
+    logger.error('ERR: auth - refresh = ', error.details[0].message)
+    return sendResponseApi({
+      res,
+      statusCode: 400,
+      message: error.details[0].message,
+    })
+  }
+  try {
+    const { decoded } = verifyJWT(value.refresh_token)
+    if (!decoded) {
+      return sendResponseApi({
+        res,
+        statusCode: 401,
+        message: 'Unauthorized',
+      })
+    }
+    const user = await authService.getUserByEmail(decoded._doc.email)
+    if (!user) {
+      return false
+    }
+
+    const accessToken = signJWT({ ...user }, { expiresIn: '1d' })
+
+    return sendResponseApi({
+      res,
+      statusCode: 200,
+      message: 'Success refresh token',
+      data: {
+        accessToken,
+      },
+    })
+  } catch (error) {
+    logger.error('ERR: auth - refresh = ', error)
+    console.log(error)
+    return sendResponseApi({
+      res,
+      statusCode: 500,
+      message: 'Internal server error',
+    })
+  }
+}
+
+export default { registerUser, loginUser, refreshToken }
