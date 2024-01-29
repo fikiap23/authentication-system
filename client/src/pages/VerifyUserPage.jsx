@@ -18,7 +18,7 @@ const VerifyUserPage = () => {
       setLoading(true)
       // check if username and password are not empty
       if (!formData.email || !formData.token) {
-        enqueueSnackbar('Email and token cannot be empty', {
+        enqueueSnackbar('Email and code cannot be empty', {
           variant: 'error',
           anchorOrigin: {
             vertical: 'bottom',

@@ -3,16 +3,16 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import ForgotPassword from './pages/ForgotPassword'
-import { useRecoilValue } from 'recoil'
-import userAtom from './atoms/userAtom'
+import Cookies from 'js-cookie'
 import VerifyUserPage from './pages/VerifyUserPage'
 
 function App() {
-  const user = useRecoilValue(userAtom)
+  const token = Cookies.get('token')
+  // console.log(token)
   return (
     <>
       <Routes>
-        <Route path="/" element={user ? <HomePage /> : <LoginPage />} />
+        <Route path="/" element={token ? <HomePage /> : <LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
