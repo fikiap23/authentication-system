@@ -25,6 +25,17 @@ const authService = {
       return await Promise.reject(error.response.data)
     }
   },
+
+  verifyUser: async (data) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/verify`, data, {
+        withCredentials: true,
+      })
+      return response.data
+    } catch (error) {
+      return await Promise.reject(error.response.data)
+    }
+  },
 }
 
 export default authService
