@@ -164,6 +164,16 @@ const loginUser = async (req: Request, res: Response) => {
         message: 'Email not found',
       })
     }
+
+    // check is email verified
+    if (!user.verified) {
+      return sendResponseApi({
+        res,
+        statusCode: 401,
+        message: 'Email not verified, please verify your email',
+      })
+    }
+
     const isPasswordMatch = await comparePassword(value.password, user.password)
     if (!isPasswordMatch) {
       return sendResponseApi({
