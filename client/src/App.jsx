@@ -5,6 +5,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import ForgotPassword from './pages/ForgotPassword'
 import Cookies from 'js-cookie'
 import VerifyUserPage from './pages/VerifyUserPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function App() {
   const token = Cookies.get('token')
@@ -16,6 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify" element={<VerifyUserPage />} />
       </Routes>
     </>
