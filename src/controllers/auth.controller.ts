@@ -6,7 +6,6 @@ import authValidation from '../validations/auth.validation'
 import { comparePassword, hashPassword } from '../utils/hashing'
 import { signJWT, verifyJWT } from '../utils/jwt'
 import { sendVerificationEmail } from '../utils/sendVerifyEmail'
-import TokenModel from '../models/token.model'
 
 const registerUser = async (req: Request, res: Response) => {
   const { error, value } = authValidation.createUserValidation(req.body)
@@ -47,17 +46,14 @@ const registerUser = async (req: Request, res: Response) => {
     const min = 10000
     const max = 99999
     const tokenValue = Math.floor(Math.random() * (max - min + 1)) + min // Angka acak 5 digit
-    const token = await new TokenModel({
+    const token = await authService.saveToken({
       user_id: newUser._id,
-      token: tokenValue,
+      token: tokenValue.toString(),
+      created_at: new Date(),
       expires_at: new Date(expireTime),
-    }).save()
+    })
 
-    await sendVerificationEmail(
-      newUser.email,
-      'Verify email',
-      token.token.toString()
-    )
+    await sendVerificationEmail(newUser.email, 'Verify email', token.token)
 
     logger.info('Success register user')
     return sendResponseApi({
