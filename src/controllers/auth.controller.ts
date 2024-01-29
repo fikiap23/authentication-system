@@ -59,10 +59,82 @@ const registerUser = async (req: Request, res: Response) => {
     return sendResponseApi({
       res,
       statusCode: 201,
-      message: 'Success register user',
+      message: `Success register user with email ${newUser.email}, please verify your email`,
     })
   } catch (error) {
     logger.error('ERR: auth - register = ', error)
+
+    return sendResponseApi({
+      res,
+      statusCode: 500,
+      message: 'Internal server error',
+    })
+  }
+}
+
+const verifyEmail = async (req: Request, res: Response) => {
+  const { error, value } = authValidation.verifyEmailValidation(req.body)
+  if (error) {
+    logger.error('ERR: auth - verify = ', error.details[0].message)
+    return sendResponseApi({
+      res,
+      statusCode: 400,
+      message: error.details[0].message,
+    })
+  }
+
+  try {
+    const user = await authService.getUserByEmail(value.email)
+    if (!user) {
+      return sendResponseApi({
+        res,
+        statusCode: 404,
+        message: 'Email not found',
+      })
+    }
+
+    const token = await authService.getTokenByUserId(user._id)
+    if (!token) {
+      return sendResponseApi({
+        res,
+        statusCode: 404,
+        message: 'Token not found',
+      })
+    }
+
+    if (token.token !== value.token) {
+      return sendResponseApi({
+        res,
+        statusCode: 401,
+        message: 'Invalid token',
+      })
+    }
+
+    if (token?.expires_at < new Date()) {
+      return sendResponseApi({
+        res,
+        statusCode: 401,
+        message: 'Token expired',
+      })
+    }
+
+    const updatedUser = await authService.changeIsVerified(user._id)
+    if (!updatedUser) {
+      return sendResponseApi({
+        res,
+        statusCode: 500,
+        message: 'Internal server error',
+      })
+    }
+
+    logger.info('Success verify email')
+    return sendResponseApi({
+      res,
+      statusCode: 200,
+      message: 'Success verify email',
+    })
+  } catch (error) {
+    logger.error('ERR: auth - verify = ', error)
 
     return sendResponseApi({
       res,
@@ -170,4 +242,4 @@ const refreshToken = async (req: Request, res: Response) => {
   }
 }
 
-export default { registerUser, loginUser, refreshToken }
+export default { registerUser, loginUser, refreshToken, verifyEmail }
