@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import authService from '../services/auth.service'
 import { logger } from '../utils/logger'
+import sendResponseApi from '../utils/sendResponseApi'
 import authValidation from '../validations/auth.validation'
 import { hashPassword } from '../utils/hashing'
 
@@ -21,25 +22,29 @@ const registerUser = async (req: Request, res: Response) => {
 
     const user = await authService.getUserByEmail(value.email)
     if (user) {
-      return res.status(409).send({
-        status: false,
+      return sendResponseApi({
+        res,
         statusCode: 409,
-        message: 'Email already exist',
+        message: 'Email already exists',
       })
     }
 
     await authService.createUser(value)
 
     logger.info('Success register user')
-    return res.status(201).send({
-      status: true,
+    return sendResponseApi({
+      res,
       statusCode: 201,
-      message: 'Register user success',
+      message: 'Success register user',
     })
   } catch (error) {
     logger.error('ERR: auth - register = ', error)
 
-    res.status(422).send({ status: false, statusCode: 422, message: error })
+    return sendResponseApi({
+      res,
+      statusCode: 500,
+      message: 'Internal server error',
+    })
   }
 }
 
