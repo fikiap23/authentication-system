@@ -42,6 +42,8 @@ The client folder contains the React application.
 
 The api folder contains the Node.js and Express.js server.
 
+API documentation is available at [api docs](https://fikiap23.github.io/authentication-system/).
+
 #### Getting Started with Api
 
 1. Navigate to the `api` folder:
@@ -82,7 +84,7 @@ The api folder contains the Node.js and Express.js server.
 
 5. The api server will run on [http://localhost:4000](http://localhost:4000).
 
-6. The api documentation is available at [http://localhost:4000/docs](http://localhost:4000/docs) or click this yaml file [api documentation](api-docs.yaml).
+6. The api documentation is available at [http://localhost:4000/docs](http://localhost:4000/docs)
 
 ### Environment
 
