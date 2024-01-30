@@ -8,6 +8,7 @@ import authValidation from '../validations/auth.validation'
 import { comparePassword, hashPassword } from '../utils/hashing'
 import { signJWT, verifyJWT } from '../utils/jwt'
 import { sendVerificationEmail } from '../utils/sendVerifyEmail'
+import CONFIG from '../config/environment'
 
 const registerUser = async (req: Request, res: Response) => {
   const { error, value } = authValidation.createUserValidation(req.body)
@@ -302,7 +303,7 @@ const sendResetPasswordEmail = async (req: Request, res: Response) => {
     }
 
     // Send reset password email
-    const resetPasswordLink = `http://localhost:5173/reset-password/${user._id}/${resetToken.token}`
+    const resetPasswordLink = `${CONFIG.client_url}/reset-password/${user._id}/${resetToken.token}`
     const message = `Click this link to reset your password: ${resetPasswordLink}`
     const result = await sendVerificationEmail(
       user.email,

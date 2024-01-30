@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import { routes } from '../routes'
 import deserializedToken from '../middlewares/deserializedToken'
+import CONFIG from '../config/environment'
 
 const createServer = () => {
   const app: Application = express()
@@ -14,7 +15,7 @@ const createServer = () => {
   // cors access handler
   app.use(
     cors({
-      origin: 'http://localhost:5173',
+      origin: CONFIG.client_url,
       credentials: true,
     })
   )
