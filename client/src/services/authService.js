@@ -36,6 +36,32 @@ const authService = {
       return await Promise.reject(error.response.data)
     }
   },
+
+  sendResetPasswordLink: async (data) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/reset-password`, data, {
+        withCredentials: true,
+      })
+      return response.data
+    } catch (error) {
+      return await Promise.reject(error.response.data)
+    }
+  },
+
+  resetPassword: async (userId, token, data) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/reset-password/${userId}/${token}`,
+        data,
+        {
+          withCredentials: true,
+        }
+      )
+      return response.data
+    } catch (error) {
+      return await Promise.reject(error.response.data)
+    }
+  },
 }
 
 export default authService

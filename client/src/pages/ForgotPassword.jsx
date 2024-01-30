@@ -1,6 +1,58 @@
-import { Link } from 'react-router-dom'
-
+import { useState } from 'react'
+import { useSnackbar } from 'notistack'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import authService from '../services/authService'
 const ForgotPassword = () => {
+  const [loading, setLoading] = useState(false)
+  const { enqueueSnackbar } = useSnackbar()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const [formData, setFormData] = useState({
+    email: location.state?.email || '',
+  })
+
+  const handleForgotPassword = async () => {
+    // console.log(formData)
+    try {
+      setLoading(true)
+      // check if username and password are not empty
+      if (!formData.email) {
+        enqueueSnackbar('Email cannot be empty', {
+          variant: 'error',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+        setLoading(false)
+        return
+      }
+
+      const result = await authService.sendResetPasswordLink(formData)
+      console.log(result)
+      if (result.status) {
+        enqueueSnackbar(result.message, {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+        setLoading(false)
+        navigate('/login')
+      }
+    } catch (error) {
+      setLoading(false)
+      enqueueSnackbar(error.message, {
+        variant: 'error',
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'center',
+        },
+      })
+    }
+  }
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -32,14 +84,20 @@ const ForgotPassword = () => {
                 name="email"
                 id="email"
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="name@company.com"
+                placeholder="name@example.com"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                required
               />
             </div>
             <button
-              type="submit"
+              type="button"
+              onClick={handleForgotPassword}
               className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Send Reset Password Link
+              {loading ? 'Loading...' : 'Send Password Reset Link'}
             </button>
             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
               Back to

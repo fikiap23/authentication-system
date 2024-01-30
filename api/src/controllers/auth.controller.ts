@@ -302,7 +302,7 @@ const sendResetPasswordEmail = async (req: Request, res: Response) => {
     }
 
     // Send reset password email
-    const resetPasswordLink = `http://localhost:4000/reset-password/${user._id}/${resetToken.token}`
+    const resetPasswordLink = `http://localhost:5173/reset-password/${user._id}/${resetToken.token}`
     const message = `Click this link to reset your password: ${resetPasswordLink}`
     const result = await sendVerificationEmail(
       user.email,

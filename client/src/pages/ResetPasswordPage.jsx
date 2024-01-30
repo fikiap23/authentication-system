@@ -1,6 +1,96 @@
-import { Link } from 'react-router-dom'
-
+import { useState } from 'react'
+import { useSnackbar } from 'notistack'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import authService from '../services/authService'
 const ResetPasswordPage = () => {
+  const [loading, setLoading] = useState(false)
+  const { enqueueSnackbar } = useSnackbar()
+  const navigate = useNavigate()
+  const { userId, token } = useParams()
+
+  const [formData, setFormData] = useState({
+    userId,
+    token,
+    password: '',
+    confirmPassword: '',
+  })
+
+  const handleResetPassword = async () => {
+    console.log(formData)
+    try {
+      setLoading(true)
+      // check if username and password are not empty
+      if (!formData.password || !formData.confirmPassword) {
+        enqueueSnackbar('Password and confirm password cannot be empty', {
+          variant: 'error',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+        setLoading(false)
+        return
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        enqueueSnackbar('Passwords do not match', {
+          variant: 'error',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+        setLoading(false)
+        return
+      }
+
+      if (formData.password.length < 6) {
+        enqueueSnackbar('Password must be at least 6 characters', {
+          variant: 'error',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+        setLoading(false)
+        return
+      }
+
+      // change format data
+      const data = {
+        newPassword: formData.password,
+      }
+
+      const result = await authService.resetPassword(
+        formData.userId,
+        formData.token,
+        data
+      )
+      console.log(result)
+      if (result.status) {
+        enqueueSnackbar(result.message, {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'center',
+          },
+        })
+        setLoading(false)
+        navigate('/login')
+      }
+    } catch (error) {
+      console.log(error)
+      enqueueSnackbar(error.message, {
+        variant: 'error',
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'center',
+        },
+      })
+      setLoading(false)
+    }
+  }
+
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -33,7 +123,9 @@ const ResetPasswordPage = () => {
                 id="password"
                 placeholder="••••••••"
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                required=""
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
               />
             </div>
             <div>
@@ -49,15 +141,18 @@ const ResetPasswordPage = () => {
                 id="confirm-password"
                 placeholder="••••••••"
                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                required=""
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
               />
             </div>
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleResetPassword}
               className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Reset passwod
+              {loading ? 'Loading...' : 'Reset Password'}
             </button>
           </form>
         </div>
