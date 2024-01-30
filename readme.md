@@ -82,6 +82,8 @@ The api folder contains the Node.js and Express.js server.
 
 5. The api server will run on [http://localhost:4000](http://localhost:4000).
 
+6. The api documentation is available at [http://localhost:4000/docs](http://localhost:4000/docs) or click this yaml file [api documentation](api-docs.yaml).
+
 ### Environment
 
 If you want use my environment, here is my .env file:
